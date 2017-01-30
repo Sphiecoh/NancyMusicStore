@@ -5,12 +5,14 @@ using NancyMusicStore.Common;
 using NancyMusicStore.Models;
 using System;
 using System.Data;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace NancyMusicStore
 {
     internal class UserMapper : IUserMapper
     {
-        public IUserIdentity GetUserFromIdentifier(Guid identifier, NancyContext context)
+        public ClaimsPrincipal GetUserFromIdentifier(Guid identifier, NancyContext context)
         {
             string cmd = "public.get_user_by_userid";
             var user = DBHelper.QueryFirstOrDefault<SysUser>(cmd, new
@@ -19,12 +21,10 @@ namespace NancyMusicStore
             }, null, null, CommandType.StoredProcedure);
 
             return user == null
-                ? null
-                : new UserIdentity
-                {
-                    UserName = user.SysUserName,
-                    Claims = new[] { "SystemUser" }
-                };           
+                       ? null
+                       : new ClaimsPrincipal(new GenericIdentity(user.SysUserName));
         }
+
+       
     }
 }

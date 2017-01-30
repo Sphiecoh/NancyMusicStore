@@ -11,11 +11,11 @@ namespace NancyMusicStore.Modules
     {
         public HomeModule() : base("/")
         {
-            Get["/"] = _ =>
+            Get("/", _ =>
             {
                 var albums = GetTopSellingAlbums(5);
                 return View["Index", albums];
-            };
+            });
         }
 
         /// <summary>

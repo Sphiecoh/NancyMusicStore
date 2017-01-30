@@ -1,6 +1,7 @@
 ﻿using Nancy;
 using Nancy.Authentication.Forms;
 using Nancy.Bootstrapper;
+using Nancy.Configuration;
 using Nancy.Conventions;
 using Nancy.Session;
 using Nancy.TinyIoc;
@@ -15,7 +16,12 @@ namespace NancyMusicStore
             //enable the cookie
             CookieBasedSessions.Enable(pipelines);
             //Prevent errors on Linux
-            StaticConfiguration.DisableErrorTraces = false;
+           
+        }
+        public override void Configure(INancyEnvironment environment)
+        {
+            base.Configure(environment);
+            environment.Tracing(false, false);
         }
 
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)

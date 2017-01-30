@@ -15,19 +15,16 @@ namespace NancyMusicStore.Modules
         {
             this.RequiresAuthentication();
 
-            Get["/"] = _ =>
+            Get("/", _ =>
             {
                 string cmd = "get_all_albums";
                 var list = DBHelper.Query<AlbumListViewModel>(cmd, null, null, true, null, CommandType.StoredProcedure);
                 return View["Index", list];
-            };
+            });
 
-            Get["/create"] = _ =>
-            {
-                return View["Create"];
-            };
+            Get("/create", _ => View["Create"]);
 
-            Post["/create"] = _ =>
+            Post("/create", _ =>
             {
                 var album = this.Bind<Album>();
 
@@ -48,9 +45,9 @@ namespace NancyMusicStore.Modules
                 }
                 ViewBag.Err = "Some Error Occurred";
                 return View["Create"];
-            };
+            });
 
-            Get["/details/{id:int}"] = _ =>
+            Get("/details/{id:int}", _ =>
             {
                 int id = 0;
                 if (int.TryParse(_.id, out id))
@@ -66,9 +63,9 @@ namespace NancyMusicStore.Modules
                     }
                 }
                 return View["Shared/Error"];
-            };
+            });
 
-            Get["/edit/{id:int}"] = _ =>
+            Get("/edit/{id:int}", _ =>
             {
                 int id = 0;
                 if (int.TryParse(_.id, out id))
@@ -84,9 +81,9 @@ namespace NancyMusicStore.Modules
                     }
                 }
                 return View["Shared/Error"];
-            };
+            });
 
-            Post["/edit"] = _ =>
+            Post("/edit", _ =>
             {
                 var album = this.Bind<Album>();
                 string cmd = "public.update_album_by_aid";
@@ -100,9 +97,9 @@ namespace NancyMusicStore.Modules
                     aurl = album.AlbumArtUrl
                 }, null, null, CommandType.StoredProcedure);
                 return Response.AsRedirect("/storemanager");
-            };
+            });
 
-            Get["/delete/{id:int}"] = _ =>
+            Get("/delete/{id:int}", _ =>
             {
                 int id = 0;
                 if (int.TryParse(_.id, out id))
@@ -118,9 +115,9 @@ namespace NancyMusicStore.Modules
                     }
                 }
                 return View["Shared/Error"];
-            };
+            });
 
-            Post["/delete/{id:int}"] = _ =>
+            Post("/delete/{id:int}", _ =>
             {
                 int id = 0;
                 if (int.TryParse(_.id, out id))
@@ -136,22 +133,22 @@ namespace NancyMusicStore.Modules
                     }
                 }
                 return View["Shared/Error"];
-            };
+            });
 
 
-            Get["/getallgenres"] = _ =>
+            Get("/getallgenres", _ =>
             {
                 string cmd = "public.get_all_genres";
                 var list = DBHelper.Query<Genre>(cmd, null, null, true, null, CommandType.StoredProcedure);
                 return Response.AsJson(list);
-            };
+            });
 
-            Get["/getallartists"] = _ =>
+            Get("/getallartists", _ =>
             {
                 string cmd = "public.get_all_artists";
                 var list = DBHelper.Query<Artist>(cmd, null, null, true, null, CommandType.StoredProcedure);
                 return Response.AsJson(list);
-            };
+            });
         }
 
     }

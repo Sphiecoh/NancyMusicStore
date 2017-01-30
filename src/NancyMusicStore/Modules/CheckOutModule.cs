@@ -13,17 +13,15 @@ namespace NancyMusicStore.Modules
         const string PromoCode = "FREE";
         public CheckOutModule() : base("/checkout")
         {
+           var test = this.Context?.CurrentUser;
             this.RequiresAuthentication();
 
-            Get["/addressandpayment"] = _ =>
-            {
-                return View["AddressAndPayment"];
-            };
+            Get("/addressandpayment", _ => View["AddressAndPayment"]);
 
-            Post["/addressandpayment"] = _ =>
+            Post("/addressandpayment", _ =>
             {
                 var order = this.Bind<Order>();
-                order.Username = this.Context.CurrentUser.UserName;
+                order.Username = this.Context.CurrentUser.Identity.Name;
                 order.OrderDate = DateTime.UtcNow;
 
                 string cmd = "public.add_order";
@@ -53,9 +51,9 @@ namespace NancyMusicStore.Modules
                     return Response.AsRedirect(redirectUrl);
                 }
                 return View["AddressAndPayment"];
-            };
+            });
 
-            Get["/complete/{id:int}"] = _ =>
+            Get("/complete/{id:int}", _ =>
             {
                 int id = _.id;
 
@@ -63,7 +61,7 @@ namespace NancyMusicStore.Modules
                 var res = DBHelper.ExecuteScalar(cmd, new
                 {
                     oid = id,
-                    uname = this.Context.CurrentUser.UserName.ToLower()
+                    uname = this.Context.CurrentUser.Identity.Name.ToLower()
                 }, null, null, CommandType.StoredProcedure);
 
                 if (Convert.ToInt32(res) > 0)
@@ -71,7 +69,7 @@ namespace NancyMusicStore.Modules
                     return View["Complete", id];
                 }
                 return View["Shared/Error"];
-            };
+            });
         }
     }
 }

@@ -11,13 +11,13 @@ namespace NancyMusicStore.Modules
     {
         public ShopCartModule() : base("/shoppingcart")
         {
-            Get["/cartsummary"] = _ =>
+            Get("/cartsummary", _ =>
             {
                 var cart = ShoppingCart.GetCart(this.Context);
                 return Response.AsJson(cart.GetCount());
-            };
+            });
 
-            Get["/addtocart/{id:int}"] = _ =>
+            Get("/addtocart/{id:int}", _ =>
             {
                 int id = 0;
                 if (int.TryParse(_.id, out id))
@@ -32,9 +32,9 @@ namespace NancyMusicStore.Modules
                     cart.AddToCart(addedAlbum);
                 }
                 return Response.AsRedirect("~/");
-            };
+            });
 
-            Get["/index"] = _ =>
+            Get("/index", _ =>
             {
                 var cart = ShoppingCart.GetCart(this.Context);
 
@@ -47,14 +47,14 @@ namespace NancyMusicStore.Modules
 
                 // Return the view
                 return View["Index", viewModel];
-            };
+            });
 
-            Post["/removefromcart"] = _ =>
+            Post("/removefromcart", _ =>
             {
                 var vm = this.Bind<ShoppingCartRemoveRequestViewModel>();
                 string albumName = string.Empty;
                 return Response.AsJson(GetRemoveResult(vm.Id, albumName));
-            };
+            });
         }
 
         private ShoppingCartRemoveViewModel GetRemoveResult(int rid, string albumName)
@@ -76,7 +76,7 @@ namespace NancyMusicStore.Modules
                 itemCount = cart.RemoveFromCart(rid);
             }
 
-            var results = new ShoppingCartRemoveViewModel
+            return new ShoppingCartRemoveViewModel
             {
                 Message = albumName + " has been removed from your shopping cart.",
                 CartTotal = cart.GetTotal(),
@@ -84,7 +84,6 @@ namespace NancyMusicStore.Modules
                 ItemCount = itemCount,
                 DeleteId = rid
             };
-            return results;
         }
     }
 }

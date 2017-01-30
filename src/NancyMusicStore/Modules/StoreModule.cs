@@ -12,17 +12,11 @@ namespace NancyMusicStore.Modules
     {
         public StoreModule() : base("/store")
         {
-            Get["/"] = _ =>
-            {
-                return View["Index", GetGenreList()];
-            };
+            Get("/", _ => View["Index", GetGenreList()]);
 
-            Get["/genremenu"] = _ =>
-            {
-                return Response.AsJson(GetGenreList());
-            };
+            Get("/genremenu", _ => Response.AsJson(GetGenreList()));
 
-            Get["details/{id:int}"] = _ =>
+            Get("details/{id:int}",_ =>
             {
                 int id = 0;
                 if (int.TryParse(_.id, out id))
@@ -38,9 +32,9 @@ namespace NancyMusicStore.Modules
                     }
                 }
                 return View["Shared/Error"];
-            };
+            });
 
-            Get["browse/{genre}"] = _ =>
+            Get("browse/{genre}", _ =>
             {
                 string genre = _.genre;
                 ViewBag.Genre = genre;
@@ -51,7 +45,7 @@ namespace NancyMusicStore.Modules
                     gname = genre
                 }, null, true, null, CommandType.StoredProcedure).ToList();
                 return View["Browse", albumList];
-            };
+            });
         }
 
         private IList<Genre> GetGenreList()

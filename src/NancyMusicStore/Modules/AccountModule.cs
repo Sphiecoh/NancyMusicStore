@@ -12,14 +12,13 @@ namespace NancyMusicStore.Modules
     {
         public AccountModule() : base("/account")
         {
-            Get["/logon"] = _ =>
+            Get("/logon", _ =>
             {
-                var returnUrl = this.Request.Query["returnUrl"];
-                ViewBag.returnUrl = returnUrl;
+                ViewBag.returnUrl = this.Request.Query["returnUrl"];
                 return View["LogOn"];
-            };
+            });
 
-            Post["/logon"] = _ =>
+            Post("/logon", _ =>
             {
                 var logonModel = this.Bind<LogOnModel>();
 
@@ -41,14 +40,11 @@ namespace NancyMusicStore.Modules
                     var redirectUrl = string.IsNullOrWhiteSpace(logonModel.ReturnUrl) ? "/" : logonModel.ReturnUrl;
                     return this.LoginAndRedirect(Guid.Parse(user.SysUserId), fallbackRedirectUrl: redirectUrl);
                 }
-            };
+            });
 
-            Get["/register"] = _ =>
-            {
-                return View["Register"];
-            };
+            Get("/register", _ => View["Register"]);
 
-            Post["/register"] = _ =>
+            Post("/register", _ =>
             {
                 var registerModel = this.Bind<RegisterModel>();
 
@@ -62,7 +58,7 @@ namespace NancyMusicStore.Modules
                 }, null, null, CommandType.StoredProcedure);
 
                 return Response.AsRedirect("~/");
-            };
+            });
         }
 
         private void MigrateShoppingCart(string UserName)
