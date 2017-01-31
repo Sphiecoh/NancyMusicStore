@@ -48,7 +48,9 @@
         <td></td>
         <td id="cart-total">
             @Model.CartTotal
+          
         </td>
+        
     </tr>
 </table>
 
@@ -76,10 +78,21 @@
                             $('#cart-total').text(data.cartTotal);
                             $('#update-message').text(data.message);
                             $('#cart-status').text('Cart (' + data.cartCount + ')');
+                            disableCheckout();
                         });
                 }
             });
-
+            function disableCheckout()
+            {
+                var value = $('#cart-total').text().trim();
+                if (value == "0") {
+                    $('.button').hide();
+                }
+                else {
+                    $('.button').show();
+                }
+            }
+            disableCheckout();
         });
 
 

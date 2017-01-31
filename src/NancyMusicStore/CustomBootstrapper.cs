@@ -21,7 +21,8 @@ namespace NancyMusicStore
         public override void Configure(INancyEnvironment environment)
         {
             base.Configure(environment);
-            environment.Tracing(false, false);
+            environment.Tracing(false, true);
+            environment.Views(false, true);
         }
 
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
