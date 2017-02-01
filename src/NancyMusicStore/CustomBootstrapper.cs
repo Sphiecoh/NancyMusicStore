@@ -5,14 +5,19 @@ using Nancy.Configuration;
 using Nancy.Conventions;
 using Nancy.Session;
 using Nancy.TinyIoc;
-using NancyMusicStore.Common;
 using System;
 using System.Net.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace NancyMusicStore
 {
     public class CustomBootstrapper : DefaultNancyBootstrapper
     {
+        private IConfiguration configuration;
+        public CustomBootstrapper(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
         protected override void ApplicationStartup(TinyIoCContainer container,IPipelines pipelines)
         {
             //enable the cookie
@@ -30,7 +35,7 @@ namespace NancyMusicStore
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
             base.ConfigureApplicationContainer(container);
-            container.Register(new HttpClient { BaseAddress = new Uri(ConfigHelper.GetAppSettingByKey("shippingApi")) });               
+            container.Register(new HttpClient { BaseAddress = new Uri(configuration["shippingApi"]) });               
         }
 
         protected override void ConfigureConventions(NancyConventions conventions)
@@ -47,7 +52,7 @@ namespace NancyMusicStore
             //form authentication
             var formsAuthConfiguration = new FormsAuthenticationConfiguration
             {
-                RedirectUrl = ConfigHelper.GetAppSettingByKey("logonUrl"),
+                RedirectUrl = configuration["logonUrl"],
                 UserMapper = container.Resolve<IUserMapper>(),
             };
             FormsAuthentication.Enable(pipelines, formsAuthConfiguration);

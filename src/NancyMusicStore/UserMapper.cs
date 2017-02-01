@@ -1,6 +1,5 @@
 ﻿using Nancy;
 using Nancy.Authentication.Forms;
-using Nancy.Security;
 using NancyMusicStore.Common;
 using NancyMusicStore.Models;
 using System;

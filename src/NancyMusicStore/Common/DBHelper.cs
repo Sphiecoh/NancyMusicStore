@@ -6,8 +6,12 @@ using System.Data;
 
 namespace NancyMusicStore.Common
 {
-    public class DBHelper
+    public static class DBHelper
     {
+        static  DBHelper()
+        {
+            
+        }
         //open connection       
         private static IDbConnection OpenConnection()
         {
