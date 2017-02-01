@@ -231,6 +231,8 @@
   <ItemGroup>
     <Compile Include="Common\ConfigHelper.cs" />
     <Compile Include="Common\DBHelper.cs" />
+    <Compile Include="Common\Extensions.cs" />
+    <Compile Include="Common\Queries.cs" />
     <Compile Include="CustomBootstrapper.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\Album.cs" />

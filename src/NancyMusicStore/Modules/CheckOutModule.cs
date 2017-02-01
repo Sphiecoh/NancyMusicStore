@@ -1,27 +1,30 @@
 ﻿using Nancy;
+using Nancy.Json;
+using Nancy.Json.Simple;
 using Nancy.ModelBinding;
 using Nancy.Security;
 using NancyMusicStore.Common;
 using NancyMusicStore.Models;
 using System;
 using System.Data;
+using System.Net.Http;
 
 namespace NancyMusicStore.Modules
 {
     public class CheckOutModule : NancyModule
     {
         const string PromoCode = "FREE";
-        public CheckOutModule() : base("/checkout")
+        public CheckOutModule(HttpClient httpClient) : base("/checkout")
         {
-           var test = this.Context?.CurrentUser;
+          
             this.RequiresAuthentication();
 
-            Get("/addressandpayment", _ => View["AddressAndPayment"]);
+            Get("/addressandpayment", _ => View["AddressAndPayment",GetLastOrder(Context.GetUserName())]);
 
-            Post("/addressandpayment", _ =>
+            Post("/addressandpayment",async(_) =>
             {
                 var order = this.Bind<Order>();
-                order.Username = this.Context.CurrentUser.Identity.Name;
+                order.Username = this.Context.GetUserName();
                 order.OrderDate = DateTime.UtcNow;
 
                 string cmd = "public.add_order";
@@ -45,8 +48,14 @@ namespace NancyMusicStore.Modules
                 {
                     order.OrderId = Convert.ToInt32(res);
                     var cart = ShoppingCart.GetCart(this.Context);
-                    cart.CreateOrder(order);
+                    var oid = cart.CreateOrder(order);
 
+                    //Call shipping service
+                    var httpContent = new StringContent(SimpleJson.SerializeObject(new { address = $"{order.Address} , {order.City} , {order.State} , {order.PostalCode}" , ordernumber = oid , userid = order.Username }),System.Text.Encoding.UTF8, mediaType: "application/json");
+                    var response =  await httpClient.PostAsync("/shipping",httpContent);
+                    response.EnsureSuccessStatusCode();
+                    var result = SimpleJson.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync());
+                    var rows = DBHelper.ExecuteScalar(Queries.AddOrderShippingId, new { shipno = (int)result.id , oid = oid }, null,null,CommandType.Text);
                     string redirectUrl = string.Format("/checkout/complete/{0}", res.ToString());
                     return Response.AsRedirect(redirectUrl);
                 }
@@ -61,7 +70,7 @@ namespace NancyMusicStore.Modules
                 var res = DBHelper.ExecuteScalar(cmd, new
                 {
                     oid = id,
-                    uname = this.Context.CurrentUser.Identity.Name.ToLower()
+                    uname = this.Context.GetUserName().ToLower()
                 }, null, null, CommandType.StoredProcedure);
 
                 if (Convert.ToInt32(res) > 0)
@@ -70,6 +79,13 @@ namespace NancyMusicStore.Modules
                 }
                 return View["Shared/Error"];
             });
+
+          
+        }
+
+        private Order GetLastOrder(string username)
+        {
+            return DBHelper.QueryFirstOrDefault<Order>(Queries.GetLastOrderAddressByUsername, new { username = username  });
         }
     }
 }

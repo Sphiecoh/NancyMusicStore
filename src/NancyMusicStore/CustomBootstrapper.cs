@@ -6,6 +6,8 @@ using Nancy.Conventions;
 using Nancy.Session;
 using Nancy.TinyIoc;
 using NancyMusicStore.Common;
+using System;
+using System.Net.Http;
 
 namespace NancyMusicStore
 {
@@ -27,7 +29,8 @@ namespace NancyMusicStore
 
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
-            base.ConfigureApplicationContainer(container);                 
+            base.ConfigureApplicationContainer(container);
+            container.Register(new HttpClient { BaseAddress = new Uri(ConfigHelper.GetAppSettingByKey("shippingApi")) });               
         }
 
         protected override void ConfigureConventions(NancyConventions conventions)
