@@ -1,9 +1,6 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<NancyMusicStore.ViewModels.AlbumDetailsViewModel>
+﻿@Master['_Layout']
 
-@{
-    ViewBag.Title = "Details";    
-}
-
+@Section['Content'] 
 <h2>Details</h2>
 
 <fieldset>
@@ -38,5 +35,6 @@
     <a href="/storemanager/edit/@Model.AlbumId">Edit</a> | 
     <a href="/storemanager">Back to List</a>    
 </p>
+@EndSection
 
 

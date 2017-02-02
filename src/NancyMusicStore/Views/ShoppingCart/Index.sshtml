@@ -1,7 +1,6 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<NancyMusicStore.ViewModels.ShoppingCartViewModel>
-@{
-    ViewBag.Title = "Shopping Cart";
-}
+﻿@Master['_Layout']
+
+@Section['Content'] 
 <h3>
     <em>Review</em> your cart:
 </h3>
@@ -23,23 +22,22 @@
         </th>
         <th></th>
     </tr>
-    @foreach (var item in Model.CartItems)
-    {
-        <tr id="row-@item.RecordId">
+    @Each.CartItems 
+        <tr id="row-@Current.RecordId">
             <td>
-                <a href="/store/details/@item.AlbumId">@item.Title</a>
+                <a href="/store/details/@Current.AlbumId">@Current.Title</a>
             </td>
             <td>
-                @item.Price
+                @Current.Price
             </td>
-            <td id="item-count-@item.RecordId">
-                @item.Count
+            <td id="item-count-@Current.RecordId">
+                @Current.Count
             </td>
             <td>
-                <a href="javascript:void(0);" class="RemoveLink" data-id="@item.RecordId">Remove from cart</a>
+                <a href="javascript:void(0);" class="RemoveLink" data-id="@Current.RecordId">Remove from cart</a>
             </td>
         </tr>
-    }
+    @EndEach
     <tr>
         <td>
             Total
@@ -53,8 +51,8 @@
         
     </tr>
 </table>
-
-@section scripts{
+@EndSection
+@Section['scripts']
     <script type="text/javascript">
         $(function () {
             // Document.ready -> link up remove event handler
@@ -113,4 +111,4 @@
         //    $('#cart-status').text('Cart (' + data.cartCount + ')');
         //}
     </script>
-}
+@EndSection

@@ -11,14 +11,16 @@ namespace NancyMusicStore.Modules
 {
     public class StoreManagerModule : NancyModule
     {
-        public StoreManagerModule() : base("/storemanager")
+        private readonly IDbHelper _dbHelper;
+        public StoreManagerModule(IDbHelper dbHelper) : base("/storemanager")
         {
+            _dbHelper = dbHelper;
             this.RequiresAuthentication();
 
             Get("/", _ =>
             {
                 string cmd = "get_all_albums";
-                var list = DBHelper.Query<AlbumListViewModel>(cmd, null, null, true, null, CommandType.StoredProcedure);
+                var list = _dbHelper.Query<AlbumListViewModel>(cmd, null, null, true, null, CommandType.StoredProcedure);
                 return View["Index", list];
             });
 
@@ -30,10 +32,10 @@ namespace NancyMusicStore.Modules
 
                 string cmd = "public.add_album";
 
-                var res = DBHelper.ExecuteScalar(cmd, new
+                var res = _dbHelper.ExecuteScalar(cmd, new
                 {
                     gid = album.GenreId,
-                    aid = album.AlbumId,
+                    aid = album.ArtistId,
                     t = album.Title,
                     p = album.Price,
                     aurl = album.AlbumArtUrl
@@ -53,7 +55,7 @@ namespace NancyMusicStore.Modules
                 if (int.TryParse(_.id, out id))
                 {
                     string cmd = "public.get_album_details_by_aid";
-                    var album = DBHelper.QueryFirstOrDefault<AlbumDetailsViewModel>(cmd, new
+                    var album = _dbHelper.QueryFirstOrDefault<AlbumDetailsViewModel>(cmd, new
                     {
                         aid = id
                     }, null, null, CommandType.StoredProcedure);
@@ -71,7 +73,7 @@ namespace NancyMusicStore.Modules
                 if (int.TryParse(_.id, out id))
                 {
                     string cmd = "public.get_album_by_aid";
-                    var album = DBHelper.QueryFirstOrDefault<Album>(cmd, new
+                    var album = _dbHelper.QueryFirstOrDefault<Album>(cmd, new
                     {
                         aid = id
                     }, null, null, CommandType.StoredProcedure);
@@ -87,7 +89,7 @@ namespace NancyMusicStore.Modules
             {
                 var album = this.Bind<Album>();
                 string cmd = "public.update_album_by_aid";
-                DBHelper.Execute(cmd, new
+                _dbHelper.Execute(cmd, new
                 {
                     aid = album.AlbumId,
                     gid = album.GenreId,
@@ -105,7 +107,7 @@ namespace NancyMusicStore.Modules
                 if (int.TryParse(_.id, out id))
                 {
                     string cmd = "public.get_album_by_aid";
-                    var album = DBHelper.QueryFirstOrDefault<Album>(cmd, new
+                    var album = _dbHelper.QueryFirstOrDefault<Album>(cmd, new
                     {
                         aid = id
                     }, null, null, CommandType.StoredProcedure);
@@ -123,7 +125,7 @@ namespace NancyMusicStore.Modules
                 if (int.TryParse(_.id, out id))
                 {
                     string cmd = "public.delete_album_by_aid";
-                    var res = DBHelper.ExecuteScalar(cmd, new
+                    var res = _dbHelper.ExecuteScalar(cmd, new
                     {
                         aid = id
                     }, null, null, CommandType.StoredProcedure);
@@ -139,14 +141,14 @@ namespace NancyMusicStore.Modules
             Get("/getallgenres", _ =>
             {
                 string cmd = "public.get_all_genres";
-                var list = DBHelper.Query<Genre>(cmd, null, null, true, null, CommandType.StoredProcedure);
+                var list = _dbHelper.Query<Genre>(cmd, null, null, true, null, CommandType.StoredProcedure);
                 return Response.AsJson(list);
             });
 
             Get("/getallartists", _ =>
             {
                 string cmd = "public.get_all_artists";
-                var list = DBHelper.Query<Artist>(cmd, null, null, true, null, CommandType.StoredProcedure);
+                var list = _dbHelper.Query<Artist>(cmd, null, null, true, null, CommandType.StoredProcedure);
                 return Response.AsJson(list);
             });
         }

@@ -1,8 +1,6 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<NancyMusicStore.Models.Order>
+﻿@Master['_Layout']
 
-@{
-    ViewBag.Title = "Address And Payment";
-}
+@Section['Content'] 
 
 <form action="/checkout/addressandpayment" method="post" id="payForm">
     <h2>Address And Payment</h2>
@@ -86,8 +84,8 @@
         <input type="submit" value="Submit Order" />
     </fieldset>
 </form>
-
-@section scripts{
+@EndSection
+@Section['scripts']
     <script src="~/Scripts/jquery.validate.min.js"></script>
     <script type="text/javascript">
         $(function () {
@@ -126,4 +124,4 @@
             });
         });
     </script>
-}
+@EndSection

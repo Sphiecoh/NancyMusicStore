@@ -10,8 +10,11 @@ namespace NancyMusicStore.Modules
 {
     public class StoreModule : NancyModule
     {
-        public StoreModule() : base("/store")
+        private readonly IDbHelper _dbHelper;
+        public StoreModule(IDbHelper dbHelper) : base("/store")
         {
+            _dbHelper = dbHelper;
+
             Get("/", _ => View["Index", GetGenreList()]);
 
             Get("/genremenu", _ => Response.AsJson(GetGenreList()));
@@ -22,7 +25,7 @@ namespace NancyMusicStore.Modules
                 if (int.TryParse(_.id, out id))
                 {
                     string cmd = "public.get_album_details_by_aid";
-                    var album = DBHelper.QueryFirstOrDefault<AlbumDetailsViewModel>(cmd, new
+                    var album = _dbHelper.QueryFirstOrDefault<AlbumDetailsViewModel>(cmd, new
                     {
                         aid = id
                     }, null, null, CommandType.StoredProcedure);
@@ -40,7 +43,7 @@ namespace NancyMusicStore.Modules
                 ViewBag.Genre = genre;
 
                 string cmd = "public.get_album_list_by_gname";
-                var albumList = DBHelper.Query<AlbumListViewModel>(cmd, new
+                var albumList = _dbHelper.Query<AlbumListViewModel>(cmd, new
                 {
                     gname = genre
                 }, null, true, null, CommandType.StoredProcedure).ToList();
@@ -51,7 +54,7 @@ namespace NancyMusicStore.Modules
         private IList<Genre> GetGenreList()
         {
             string cmd = "public.get_all_genres";
-            return DBHelper.Query<Genre>(cmd, null, null, true, null, CommandType.StoredProcedure);
+            return _dbHelper.Query<Genre>(cmd, null, null, true, null, CommandType.StoredProcedure);
         }
     }
 }

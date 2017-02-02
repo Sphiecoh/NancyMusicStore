@@ -6,22 +6,23 @@ using System.Data;
 
 namespace NancyMusicStore.Common
 {
-    public static class DBHelper
+    public class DBHelper : IDbHelper
     {
-        static  DBHelper()
+        private readonly string connectionString;
+        public DBHelper(string connection)
         {
-            
+            connectionString = connection;
         }
         //open connection       
-        private static IDbConnection OpenConnection()
+        private  IDbConnection OpenConnection()
         {
-            var conn = new NpgsqlConnection(ConfigHelper.GetConneectionStr());
+            var conn = new NpgsqlConnection(connectionString);
             conn.Open();
             return conn;
         }
 
         //execute 
-        public static int Execute(string sql, object param = null, IDbTransaction transaction = null,
+        public  int Execute(string sql, object param = null, IDbTransaction transaction = null,
             int? commandTimeout = null, CommandType? commandType = null)
         {
             using (var conn = OpenConnection())
@@ -31,7 +32,7 @@ namespace NancyMusicStore.Common
         }
 
         //execute 
-        public static object ExecuteScalar(string cmd, object param = null, IDbTransaction transaction = null,
+        public  object ExecuteScalar(string cmd, object param = null, IDbTransaction transaction = null,
             int? commandTimeout = null, CommandType? commandType = null)
         {
             using (var conn = OpenConnection())
@@ -41,8 +42,8 @@ namespace NancyMusicStore.Common
         }
 
         //do query and return a list
-        public static IList<T> Query<T>(string sql, object param = null, IDbTransaction transaction = null,
-            bool buffered = true, int? commandTimeout = null, CommandType? commandType = null) where T : class
+        public  IList<T> Query<T>(string sql, object param = null, IDbTransaction transaction = null,
+            bool buffered = true, int? commandTimeout = null, CommandType? commandType = null) 
         {
             using (var conn = OpenConnection())
             {
@@ -51,8 +52,8 @@ namespace NancyMusicStore.Common
         }
 
         //do query and return the first entity
-        public static T QueryFirstOrDefault<T>(string sql, object param = null, IDbTransaction transaction = null,
-            int? commandTimeout = null, CommandType? commandType = null) where T : class
+        public  T QueryFirstOrDefault<T>(string sql, object param = null, IDbTransaction transaction = null,
+            int? commandTimeout = null, CommandType? commandType = null) 
         {
             using (var conn = OpenConnection())
             {

@@ -12,7 +12,7 @@ namespace NancyMusicStore
     public class Startup
     {
         private readonly IConfiguration configuration;
-        public Startup()
+        public Startup(IHostingEnvironment env)
         {
             Log.Logger = new LoggerConfiguration()
            .WriteTo.RollingFile("logs/log-{Date}.log")
@@ -21,6 +21,7 @@ namespace NancyMusicStore
              
              
              configuration = new ConfigurationBuilder()
+             .SetBasePath(env.ContentRootPath)
             .AddEnvironmentVariables(prefix: "ASPNETCORE_")
             .AddJsonFile("appsettings.json",true)
             .Build();

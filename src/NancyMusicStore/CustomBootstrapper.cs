@@ -8,6 +8,8 @@ using Nancy.TinyIoc;
 using System;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
+using NancyMusicStore.Common;
+using NancyMusicStore.Models;
 
 namespace NancyMusicStore
 {
@@ -18,13 +20,15 @@ namespace NancyMusicStore
         {
             this.configuration = configuration;
         }
+
         protected override void ApplicationStartup(TinyIoCContainer container,IPipelines pipelines)
         {
             //enable the cookie
             CookieBasedSessions.Enable(pipelines);
             //Prevent errors on Linux
-           
+
         }
+
         public override void Configure(INancyEnvironment environment)
         {
             base.Configure(environment);
@@ -35,7 +39,9 @@ namespace NancyMusicStore
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
             base.ConfigureApplicationContainer(container);
-            container.Register(new HttpClient { BaseAddress = new Uri(configuration["shippingApi"]) });               
+            container.Register(new HttpClient { BaseAddress = new Uri(configuration["shippingApi"]) });
+            container.Register<IDbHelper>((y,_) => new DBHelper(configuration.GetConnectionString("pgsqlConn")));
+            container.Register(typeof(ShoppingCart));
         }
 
         protected override void ConfigureConventions(NancyConventions conventions)
@@ -43,7 +49,6 @@ namespace NancyMusicStore
             base.ConfigureConventions(conventions);
             conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("Scripts"));
             conventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("Content"));
-            
         }
 
         protected override void RequestStartup(TinyIoCContainer container, IPipelines pipelines, NancyContext context)

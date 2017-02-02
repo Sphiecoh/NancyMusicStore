@@ -10,21 +10,26 @@ namespace NancyMusicStore.Models
 {
     public partial class ShoppingCart
     {
-        string ShoppingCartId { get; set; }
-
-        public const string CartSessionKey = "CartId";
-
-        public static ShoppingCart GetCart(NancyContext context)
+        private readonly IDbHelper _dbHelper;
+        public ShoppingCart(IDbHelper dbHelper)
         {
-            var cart = new ShoppingCart();
-            cart.ShoppingCartId = cart.GetCartId(context);
-            return cart;
+            _dbHelper = dbHelper;
+        }
+
+        public string ShoppingCartId { get; set; }
+
+        public  string CartSessionKey = "CartId";
+
+        public ShoppingCart GetCart(NancyContext context)
+        {
+            ShoppingCartId = GetCartId(context);
+            return this;
         }
 
         public void AddToCart(Album album)
         {
-            string getItemCmd = "public.get_cart_item_by_cartid_and_albumid";
-            var cartItem = DBHelper.QueryFirstOrDefault<Cart>(getItemCmd, new
+            const string getItemCmd = "public.get_cart_item_by_cartid_and_albumid";
+            var cartItem = _dbHelper.QueryFirstOrDefault<Cart>(getItemCmd, new
             {
                 cid = ShoppingCartId,
                 aid = album.AlbumId
@@ -44,19 +49,19 @@ namespace NancyMusicStore.Models
 
         public int RemoveFromCart(int id)
         {
-            string getItemCmd = "public.get_cart_item_by_cartid_and_recordid";
-            var cartItem = DBHelper.QueryFirstOrDefault<Cart>(getItemCmd, new
+            const string getItemCmd = "public.get_cart_item_by_cartid_and_recordid";
+            var cartItem = _dbHelper.QueryFirstOrDefault<Cart>(getItemCmd, new
             {
                 cid = ShoppingCartId,
                 rid = id
             }, null, null, CommandType.StoredProcedure);
 
-            int itemCount = 0;
+            const int itemCount = 0;
             if (cartItem != null)
-            {                
+            {
                 if (cartItem.Count > 1)
                 {
-                    UpdateCartItemCount(cartItem, itemCount);                   
+                    UpdateCartItemCount(cartItem, itemCount);
                 }
                 else
                 {
@@ -68,8 +73,8 @@ namespace NancyMusicStore.Models
 
         public void EmptyCart()
         {
-            string cmd = "public.delete_cart_item_by_cid";
-            DBHelper.Execute(cmd, new
+            const string cmd = "public.delete_cart_item_by_cid";
+            _dbHelper.Execute(cmd, new
             {
                 cid = ShoppingCartId
             }, null, null, CommandType.StoredProcedure);
@@ -77,8 +82,8 @@ namespace NancyMusicStore.Models
 
         public List<CartViewModel> GetCartItems()
         {
-            string cmd = "public.get_cart_item_by_cid";
-            return DBHelper.Query<CartViewModel>(cmd, new
+            const string cmd = "public.get_cart_item_by_cid";
+            return _dbHelper.Query<CartViewModel>(cmd, new
             {
                 cid = ShoppingCartId
             }, null, true, null, CommandType.StoredProcedure).ToList();
@@ -86,8 +91,8 @@ namespace NancyMusicStore.Models
 
         public int GetCount()
         {
-            string cmd = "public.get_total_count_by_cartid";
-            var res = DBHelper.ExecuteScalar(cmd, new
+            const string cmd = "public.get_total_count_by_cartid";
+            var res = _dbHelper.ExecuteScalar(cmd, new
             {
                 cid = ShoppingCartId
             }, null, null, CommandType.StoredProcedure);
@@ -97,8 +102,8 @@ namespace NancyMusicStore.Models
 
         public decimal GetTotal()
         {
-            string cmd = "public.get_total_order_by_cartid";
-            var res = DBHelper.ExecuteScalar(cmd, new
+            const string cmd = "public.get_total_order_by_cartid";
+            var res = _dbHelper.ExecuteScalar(cmd, new
             {
                 cid = ShoppingCartId
             }, null, null, CommandType.StoredProcedure);
@@ -110,9 +115,9 @@ namespace NancyMusicStore.Models
         {
             decimal orderTotal = 0;
 
-            var cartItems = GetCartItems();                        
+            var cartItems = GetCartItems();
             foreach (var item in cartItems)
-            {                
+            {
                 AddOrderDetails(new OrderDetail
                 {
                     AlbumId = item.AlbumId,
@@ -121,10 +126,10 @@ namespace NancyMusicStore.Models
                     Quantity = item.Count
                 });
                 // Set the order total of the shopping cart
-                orderTotal += (item.Count * item.Price);
+                orderTotal += item.Count * item.Price;
             }
 
-            UpdateOrderTotal(order.OrderId, orderTotal);         
+            UpdateOrderTotal(order.OrderId, orderTotal);
 
             // Empty the shopping cart
             EmptyCart();
@@ -152,8 +157,8 @@ namespace NancyMusicStore.Models
 
         public void MigrateCart(string userName)
         {
-            string cmd = "public.update_cartid_by_recordids";
-            DBHelper.ExecuteScalar(cmd, new
+            const string cmd = "public.update_cartid_by_recordids";
+            _dbHelper.ExecuteScalar(cmd, new
             {
                 ncid = userName,
                 ocid = ShoppingCartId
@@ -170,22 +175,21 @@ namespace NancyMusicStore.Models
                 Count = 1,
                 DateCreated = DateTime.Now
             };
-            string addToCartCmd = "public.add_cart_item";
-            DBHelper.Execute(addToCartCmd, new
+            const string addToCartCmd = "public.add_cart_item";
+            _dbHelper.Execute(addToCartCmd, new
             {
                 cid = cartItem.CartId,
                 aid = cartItem.AlbumId,
                 num = cartItem.Count,
                 cdate = cartItem.DateCreated
             }, null, null, CommandType.StoredProcedure);
-
         }
 
         private void UpdateCartItem(Cart cartItem)
         {
             cartItem.Count++;
-            string addToCartCmd = "public.update_cart_item";
-            DBHelper.Execute(addToCartCmd, new
+            const string addToCartCmd = "public.update_cart_item";
+            _dbHelper.Execute(addToCartCmd, new
             {
                 cid = cartItem.CartId,
                 aid = cartItem.AlbumId,
@@ -198,8 +202,8 @@ namespace NancyMusicStore.Models
             cartItem.Count--;
             itemCount = cartItem.Count;
 
-            string cmd = "public.update_cart_count_by_recordid";
-            DBHelper.Execute(cmd, new
+            const string cmd = "public.update_cart_count_by_recordid";
+            _dbHelper.Execute(cmd, new
             {
                 rid = cartItem.RecordId,
                 num = cartItem.Count
@@ -208,8 +212,8 @@ namespace NancyMusicStore.Models
 
         private void RemoveCartItem(int recordId)
         {
-            string cmd = "public.delete_cart_item_by_recordid";
-            DBHelper.Execute(cmd, new
+            const string cmd = "public.delete_cart_item_by_recordid";
+            _dbHelper.Execute(cmd, new
             {
                 rid = recordId
             }, null, null, CommandType.StoredProcedure);
@@ -217,8 +221,8 @@ namespace NancyMusicStore.Models
 
         private void AddOrderDetails(OrderDetail orderDetail)
         {
-            string createCmd = "public.add_order_details";
-            DBHelper.ExecuteScalar(createCmd, new
+            const string createCmd = "public.add_order_details";
+            _dbHelper.ExecuteScalar(createCmd, new
             {
                 oid = orderDetail.OrderId,
                 aid = orderDetail.AlbumId,
@@ -229,14 +233,14 @@ namespace NancyMusicStore.Models
 
         private void UpdateOrderTotal(int orderId, decimal orderTotal)
         {
-            string updateCmd = "public.update_order_total_by_orderid";
+            const string updateCmd = "public.update_order_total_by_orderid";
 
-            var res = DBHelper.ExecuteScalar(updateCmd, new
+            var res = _dbHelper.ExecuteScalar(updateCmd, new
             {
                 t = orderTotal,
                 oid = orderId
             }, null, null, CommandType.StoredProcedure);
-        } 
+        }
         #endregion
     }
 }

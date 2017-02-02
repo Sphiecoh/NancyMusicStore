@@ -1,20 +1,11 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<NancyMusicStore.Models.Album>
+﻿@Master['_Layout']
 
-@{
-    ViewBag.Title = "Edit";
-}
+@Section['Content']
+<h2>Create</h2>
 
-
-<h2>Edit</h2>
-@if (ViewBag.Err != null)
-{
-    <b>ViewBag.Err</b>
-}
-<form action="/storemanager/edit" method="post" id="editForm">
+<form action="/storemanager/create" method="post" id="createForm">
     <fieldset>
         <legend>Album</legend>
-
-        <input type="hidden" value="@Model.AlbumId" name="albumid" />
 
         <div class="editor-label">
             Genre
@@ -34,25 +25,25 @@
             Title
         </div>
         <div class="editor-field">
-            <input type="text" name="title" value="@Model.Title" />
+            <input type="text" name="title" />
         </div>
 
         <div class="editor-label">
             Price
         </div>
         <div class="editor-field">
-            <input type="text" name="price" value="@Model.Price" />
+            <input type="number" name="price" />
         </div>
 
         <div class="editor-label">
             AlbumArtUrl
         </div>
         <div class="editor-field">
-            <input type="text" name="albumarturl" value="@Model.AlbumArtUrl" />
+            <input type="text" name="albumarturl" />
         </div>
 
         <p>
-            <input type="submit" value="Edit" />
+            <input type="submit" value="Create" />
         </p>
     </fieldset>
 
@@ -61,7 +52,9 @@
 <div>
     <a href="/storemanager">Back to List</a>
 </div>
-@section scripts{
+@EndSection
+
+@Section['scripts']
     <script src="~/Scripts/jquery.validate.min.js"></script>
     <script type="text/javascript">
         $(function () {
@@ -73,7 +66,6 @@
                     for (var i = 0; i < res.length; i++) {
                         $("#genre").append('<option value="' + res[i].genreId + '">' + res[i].name + '</option>');
                     }
-                    $("#genre").val(@Model.GenreId);
                 }
             });
 
@@ -85,11 +77,10 @@
                     for (var i = 0; i < res.length; i++) {
                         $("#artist").append('<option value="' + res[i].artistId + '">' + res[i].name + '</option>');
                     }
-                    $("#artist").val(@Model.ArtistId);
                 }
             });
 
-            $("#editForm").validate({
+            $("#createForm").validate({
                 rules: {
                     title: "required",
                     price: "required"
@@ -105,4 +96,4 @@
 
         });
     </script>
-}
+@EndSection

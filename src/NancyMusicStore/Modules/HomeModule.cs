@@ -9,8 +9,11 @@ namespace NancyMusicStore.Modules
 {
     public class HomeModule : NancyModule
     {
-        public HomeModule() : base("/")
+        private readonly IDbHelper _dbHelper;
+        public HomeModule(IDbHelper dbHelper) : base("/")
         {
+            _dbHelper = dbHelper;
+
             Get("/", _ =>
             {
                 var albums = GetTopSellingAlbums(5);
@@ -25,12 +28,11 @@ namespace NancyMusicStore.Modules
         /// <returns></returns>
         private List<Album> GetTopSellingAlbums(int count)
         {
-            string sql = "public.get_top_selling_albums";
-            var list = DBHelper.Query<Album>(sql, new
+         const string sql = "public.get_top_selling_albums";
+            return _dbHelper.Query<Album>(sql, new
             {
                 num = count
             }, null, true, null, CommandType.StoredProcedure).ToList();
-            return list;
         }
     }
 }

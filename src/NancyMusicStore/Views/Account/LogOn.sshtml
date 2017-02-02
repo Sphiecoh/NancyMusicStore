@@ -1,7 +1,6 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<NancyMusicStore.Models.LogOnModel>
-@{
-    ViewBag.Title = "Log On";
-}
+﻿@Master['_Layout']
+
+@Section['Content'] 
 
 <h2>Log On</h2>
 <p>
@@ -26,15 +25,9 @@
             <div class="editor-field">
                 <input type="password" name="sysuserpassword" />
             </div>
-            @if (ViewBag.returnUrl == null)
-            {
-            <input type="hidden" name="returnUrl" value="" />
-            }
-            else
-            {
+           
             <input type="hidden" name="returnUrl" value="@ViewBag.returnUrl" />
-            }
-
+          
 
             <p>
                 <input type="submit" value="Log On" />
@@ -42,7 +35,9 @@
         </fieldset>
     </div>
 </form>
-@section scripts{
+@EndSection
+
+@Section['scripts']
     <script src="~/Scripts/jquery.validate.min.js"></script>
     <script type="text/javascript">
         $(function () {
@@ -60,4 +55,5 @@
                 }
             });
         });
-    </script>}
+    </script>
+@EndSection

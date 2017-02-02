@@ -1,8 +1,6 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<NancyMusicStore.Models.Album>
-@{
-    ViewBag.Title = "Delete";    
-}
+﻿@Master['_Layout']
 
+@Section['Content'] 
 <h2>Delete Confirmation</h2>
 
 <p>
@@ -18,3 +16,4 @@
         <a href="/storemanager">Back to List</a>
     </p>
 </form>
+@EndSection

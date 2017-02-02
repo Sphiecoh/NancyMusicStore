@@ -14,9 +14,13 @@ namespace NancyMusicStore.Modules
     public class CheckOutModule : NancyModule
     {
         const string PromoCode = "FREE";
-        public CheckOutModule(HttpClient httpClient) : base("/checkout")
+        private readonly IDbHelper _dbHelper;
+        private readonly ShoppingCart shoppingCart;
+        public CheckOutModule(HttpClient httpClient , IDbHelper helper , ShoppingCart shoppingCart) : base("/checkout")
         {
-          
+            _dbHelper = helper;
+            this.shoppingCart = shoppingCart;
+
             this.RequiresAuthentication();
 
             Get("/addressandpayment", _ => View["AddressAndPayment",GetLastOrder(Context.GetUserName())]);
@@ -28,7 +32,7 @@ namespace NancyMusicStore.Modules
                 order.OrderDate = DateTime.UtcNow;
 
                 string cmd = "public.add_order";
-                var res = DBHelper.ExecuteScalar(cmd, new
+                var res = _dbHelper.ExecuteScalar(cmd, new
                 {
                     odate = order.OrderDate,
                     uname = order.Username,
@@ -47,7 +51,7 @@ namespace NancyMusicStore.Modules
                 if (Convert.ToInt32(res) != 0)
                 {
                     order.OrderId = Convert.ToInt32(res);
-                    var cart = ShoppingCart.GetCart(this.Context);
+                    var cart = shoppingCart.GetCart(this.Context);
                     var oid = cart.CreateOrder(order);
 
                     //Call shipping service
@@ -55,7 +59,7 @@ namespace NancyMusicStore.Modules
                     var response =  await httpClient.PostAsync("/shipping",httpContent);
                     response.EnsureSuccessStatusCode();
                     var result = SimpleJson.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync());
-                    var rows = DBHelper.ExecuteScalar(Queries.AddOrderShippingId, new { shipno = (int)result.id , oid = oid }, null,null,CommandType.Text);
+                    var rows = _dbHelper.ExecuteScalar(Queries.AddOrderShippingId, new { shipno = (int)result.id , oid = oid }, null,null,CommandType.Text);
                     string redirectUrl = string.Format("/checkout/complete/{0}", res.ToString());
                     return Response.AsRedirect(redirectUrl);
                 }
@@ -67,7 +71,7 @@ namespace NancyMusicStore.Modules
                 int id = _.id;
 
                 string cmd = "public.get_order_count_by_uname_and_orderid";
-                var res = DBHelper.ExecuteScalar(cmd, new
+                var res = _dbHelper.ExecuteScalar(cmd, new
                 {
                     oid = id,
                     uname = this.Context.GetUserName().ToLower()
@@ -85,7 +89,7 @@ namespace NancyMusicStore.Modules
 
         private Order GetLastOrder(string username)
         {
-            return DBHelper.QueryFirstOrDefault<Order>(Queries.GetLastOrderAddressByUsername, new { username = username  });
+            return _dbHelper.QueryFirstOrDefault<Order>(Queries.GetLastOrderAddressByUsername, new { username = username  });
         }
     }
 }

@@ -1,9 +1,6 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<NancyMusicStore.Models.RegisterModel>
+﻿@Master['_Layout']
 
-@{
-    ViewBag.Title = "Register";
-}
-
+@Section['Content'] 
 <h2>Create a New Account</h2>
 <p>
     Use the form below to create a new account.
@@ -52,8 +49,8 @@
     </div>
 
 </form>
-
-@section scripts{
+@EndSection
+@Section['scripts']
     <script src="~/Scripts/jquery.validate.min.js"></script>
     <script type="text/javascript">
         $(function () {
@@ -95,4 +92,4 @@
             });
         });
     </script>
-}
+@EndSection

@@ -10,8 +10,13 @@ namespace NancyMusicStore.Modules
 {
     public class AccountModule : NancyModule
     {
-        public AccountModule() : base("/account")
+        private readonly IDbHelper _dbHelper;
+        private readonly ShoppingCart shoppingCart;
+        public AccountModule(IDbHelper DbHelper, ShoppingCart shoppingCart) : base("/account")
         {
+            _dbHelper = DbHelper;
+            this.shoppingCart = shoppingCart;
+
             Get("/logon", _ =>
             {
                 ViewBag.returnUrl = this.Request.Query["returnUrl"];
@@ -23,7 +28,7 @@ namespace NancyMusicStore.Modules
                 var logonModel = this.Bind<LogOnModel>();
 
                 string cmd = "public.get_user_by_name_and_password";
-                var user = DBHelper.QueryFirstOrDefault<SysUser>(cmd, new
+                var user = _dbHelper.QueryFirstOrDefault<SysUser>(cmd, new
                 {
                     uname = logonModel.SysUserName,
                     upwd = logonModel.SysUserPassword
@@ -49,7 +54,7 @@ namespace NancyMusicStore.Modules
                 var registerModel = this.Bind<RegisterModel>();
 
                 string cmd = "public.add_user";
-                DBHelper.Execute(cmd, new
+                _dbHelper.Execute(cmd, new
                 {
                     uid = Guid.NewGuid().ToString(),
                     uname = registerModel.SysUserName,
@@ -64,10 +69,10 @@ namespace NancyMusicStore.Modules
         private void MigrateShoppingCart(string UserName)
         {
             // Associate shopping cart items with logged-in user
-            var cart = ShoppingCart.GetCart(this.Context);
+            var cart = shoppingCart.GetCart(this.Context);
 
             cart.MigrateCart(UserName);
-            Session[ShoppingCart.CartSessionKey] = UserName;
+            Session[shoppingCart.CartSessionKey] = UserName;
         }
     }
 }

@@ -11,10 +11,16 @@ namespace NancyMusicStore
 {
     internal class UserMapper : IUserMapper
     {
+        private readonly IDbHelper _dbHelper;
+        public UserMapper(IDbHelper dbHelper)
+        {
+            _dbHelper = dbHelper;
+        }
+
         public ClaimsPrincipal GetUserFromIdentifier(Guid identifier, NancyContext context)
         {
-            string cmd = "public.get_user_by_userid";
-            var user = DBHelper.QueryFirstOrDefault<SysUser>(cmd, new
+            const string cmd = "public.get_user_by_userid";
+            var user = _dbHelper.QueryFirstOrDefault<SysUser>(cmd, new
             {
                 uid = identifier.ToString()
             }, null, null, CommandType.StoredProcedure);
@@ -23,7 +29,5 @@ namespace NancyMusicStore
                        ? null
                        : new ClaimsPrincipal(new GenericIdentity(user.SysUserName));
         }
-
-       
     }
 }
